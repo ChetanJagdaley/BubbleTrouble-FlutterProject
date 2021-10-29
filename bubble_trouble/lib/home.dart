@@ -32,6 +32,7 @@ class _HomepageState extends State<Homepage> {
   void resetMissile() {
     missileX = playerX;
     missileHeight = 10;
+    midshot = false;
   }
 
   void moveLeft() {
@@ -71,33 +72,99 @@ class _HomepageState extends State<Homepage> {
           missileHeight += 10;
         });
 
+        //reset missile when it hits the top
         if (missileHeight > MediaQuery.of(context).size.height * 3 / 4) {
           resetMissile();
           timer.cancel();
-          midshot = false;
+        }
+
+        //checks if missile hits the ball
+        if(ballY>heightToCoordinate(missileHeight) && (ballX-missileX).abs()<0.03){
+          resetMissile();
+          ballY=5;
+          timer.cancel();
         }
       });
     }
   }
 
   void startGame() {
-    Timer.periodic(Duration(milliseconds: 50), (Timer) {
+
+    double time = 0 ;
+    double height = 0 ;
+    double velocity = 100; // how strong the jump is 
+    Timer.periodic(Duration(milliseconds: 20), (Timer) {
+
+      //quadratic equation that models a bounce (upside and parabola)
+      height = -5 * time * time + velocity * time;
+
+
+      // if the ball reaches the ground , reset the jump
+      if(height<0){
+        time = 0;
+      }
+
+      setState(() {
+        ballY= heightToCoordinate(height);
+      });
+
+      time +=0.1;
+
+      //if the ball hits the left wall change its direction to the right
       if (ballX - 0.03 < -1) {
         ballDirection = direction.RIGHT;
-      } else if (ballX + 0.03 > 1) {
+      }
+
+      // if the ball hits the right wall change its direction to the right wall
+       else if (ballX + 0.03 > 1) {
         ballDirection = direction.LEFT;
       }
 
       if (ballDirection == direction.LEFT) {
         setState(() {
-          ballX -= .03;
+          ballX -= .005;
         });
+
       } else if (ballDirection == direction.RIGHT) {
         setState(() {
-          ballX += .03;
+          ballX += .005;
         });
       }
+      if(playerDies()){
+        Timer.cancel();
+        _showDialog();
+      }
     });
+  }
+
+  void _showDialog(){
+    showDialog(context: context, builder: (BuildContext context){
+      return AlertDialog(
+        backgroundColor: Colors.grey,
+        title: Text('You dead bruh!',
+        style: TextStyle(
+          color: Colors.white,
+        ),),
+      );
+    });
+  }
+
+  bool playerDies(){
+    //if the ball touches the player
+    if((ballX-playerX).abs()<0.05 && ballY> 0.95){
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
+
+
+// this function convert height to coordinate
+  double heightToCoordinate(double height){
+    double totalHeight = MediaQuery.of(context).size.height*3/4;
+    double missileY = 1-2*height/totalHeight;
+    return missileY;
   }
 
   @override
