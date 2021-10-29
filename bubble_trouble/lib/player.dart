@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class MyPlayer extends StatelessWidget {
   final playerX;
-  const MyPlayer({this.playerX}) ;
+  const MyPlayer({this.playerX});
 
   @override
   Widget build(BuildContext context) {

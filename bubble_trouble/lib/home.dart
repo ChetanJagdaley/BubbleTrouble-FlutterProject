@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:bubble_trouble/ball.dart';
 import 'package:bubble_trouble/missile.dart';
 import 'package:bubble_trouble/player.dart';
@@ -16,6 +16,9 @@ class Homepage extends StatefulWidget {
 enum direction { left, right }
 
 class _HomepageState extends State<Homepage> {
+  //score
+  int myScore = 0;
+
   // player variables
   static double playerX = 0;
 
@@ -63,7 +66,7 @@ class _HomepageState extends State<Homepage> {
 
   void fireMissile() {
     if (midshot == false) {
-      Timer.periodic(Duration(milliseconds: 30), (timer) {
+      Timer.periodic(const Duration(milliseconds: 30), (timer) {
         //shot fired and we dont want another shot right away
         midshot = true;
 
@@ -79,9 +82,11 @@ class _HomepageState extends State<Homepage> {
         }
 
         //checks if missile hits the ball
-        if(ballY>heightToCoordinate(missileHeight) && (ballX-missileX).abs()<0.03){
+        if (ballY > heightToCoordinate(missileHeight) &&
+            (ballX - missileX).abs() < 0.03) {
           resetMissile();
-          ballY=5;
+          ballY = 5;
+          myScore++;
           timer.cancel();
         }
       });
@@ -89,26 +94,23 @@ class _HomepageState extends State<Homepage> {
   }
 
   void startGame() {
-
-    double time = 0 ;
-    double height = 0 ;
-    double velocity = 100; // how strong the jump is 
-    Timer.periodic(Duration(milliseconds: 20), (Timer) {
-
+    double time = 0;
+    double height = 0;
+    double velocity = 100; // how strong the jump is
+    Timer.periodic(const Duration(milliseconds: 20), (Timer) {
       //quadratic equation that models a bounce (upside and parabola)
       height = -5 * time * time + velocity * time;
 
-
       // if the ball reaches the ground , reset the jump
-      if(height<0){
+      if (height < 0) {
         time = 0;
       }
 
       setState(() {
-        ballY= heightToCoordinate(height);
+        ballY = heightToCoordinate(height);
       });
 
-      time +=0.1;
+      time += 0.1;
 
       //if the ball hits the left wall change its direction to the right
       if (ballX - 0.03 < -1) {
@@ -116,7 +118,7 @@ class _HomepageState extends State<Homepage> {
       }
 
       // if the ball hits the right wall change its direction to the right wall
-       else if (ballX + 0.03 > 1) {
+      else if (ballX + 0.03 > 1) {
         ballDirection = direction.left;
       }
 
@@ -124,46 +126,65 @@ class _HomepageState extends State<Homepage> {
         setState(() {
           ballX -= .005;
         });
-
       } else if (ballDirection == direction.right) {
         setState(() {
           ballX += .005;
         });
       }
-      if(playerDies()){
+      if (playerDies()) {
         Timer.cancel();
         _showDialog();
       }
     });
   }
 
-  void _showDialog(){
-    showDialog(context: context, builder: (BuildContext context){
-      return AlertDialog(
-        backgroundColor: Colors.grey,
-        title: Text('You dead bruh!',
-        style: TextStyle(
-          color: Colors.white,
-        ),),
-      );
-    });
+  void _showDialog() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            title:Text(
+              'You dead bruh!\n\n Score: $myScore',
+              style: TextStyle(
+                color: Colors.grey[600],
+              ),
+            ),
+            actions:<Widget>[
+              TextButton(onPressed: (){
+                Phoenix.rebirth(context);
+              },
+              child: Material(
+                elevation: 50,
+                child: Container(
+                  color: Colors.grey[600],
+                  child: const Text('Restart Game',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    letterSpacing: 1,
+                  ),)
+                  ),
+              ),
+              ),
+            ],
+          );
+        });
   }
 
-  bool playerDies(){
+  bool playerDies() {
     //if the ball touches the player
-    if((ballX-playerX).abs()<0.05 && ballY> 0.95){
+    if ((ballX - playerX).abs() < 0.1 && ballY > 0.95) {
       return true;
-    }
-    else{
+    } else {
       return false;
     }
   }
 
-
 // this function convert height to coordinate
-  double heightToCoordinate(double height){
-    double totalHeight = MediaQuery.of(context).size.height*3/4;
-    double missileY = 1-2*height/totalHeight;
+  double heightToCoordinate(double height) {
+    double totalHeight = MediaQuery.of(context).size.height * 3 / 4;
+    double missileY = 1 - 2 * height / totalHeight;
     return missileY;
   }
 
@@ -185,6 +206,19 @@ class _HomepageState extends State<Homepage> {
                     ),
                     MyPlayer(
                       playerX: playerX,
+                    ),
+                    SafeArea(
+                      child: Container(
+                        alignment: Alignment(1, -1),
+                        child: Material(
+                          child: Text('Score:$myScore',
+                          style: TextStyle(
+                            color: Colors.indigo,
+                            fontSize: 40,
+                          ),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),

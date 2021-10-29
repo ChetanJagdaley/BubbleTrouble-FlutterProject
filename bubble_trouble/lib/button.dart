@@ -17,7 +17,7 @@ class MyButton extends StatelessWidget {
           height: 50,
           child: Center(
             child: Icon(icon),
-            ),
+          ),
         ),
       ),
     );
