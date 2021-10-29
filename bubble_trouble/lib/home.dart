@@ -13,7 +13,7 @@ class Homepage extends StatefulWidget {
   _HomepageState createState() => _HomepageState();
 }
 
-enum direction { LEFT, RIGHT }
+enum direction { left, right }
 
 class _HomepageState extends State<Homepage> {
   // player variables
@@ -27,7 +27,7 @@ class _HomepageState extends State<Homepage> {
   //ball variables
   double ballX = 0.5;
   double ballY = 0;
-  var ballDirection = direction.LEFT;
+  var ballDirection = direction.left;
 
   void resetMissile() {
     missileX = playerX;
@@ -112,20 +112,20 @@ class _HomepageState extends State<Homepage> {
 
       //if the ball hits the left wall change its direction to the right
       if (ballX - 0.03 < -1) {
-        ballDirection = direction.RIGHT;
+        ballDirection = direction.right;
       }
 
       // if the ball hits the right wall change its direction to the right wall
        else if (ballX + 0.03 > 1) {
-        ballDirection = direction.LEFT;
+        ballDirection = direction.left;
       }
 
-      if (ballDirection == direction.LEFT) {
+      if (ballDirection == direction.left) {
         setState(() {
           ballX -= .005;
         });
 
-      } else if (ballDirection == direction.RIGHT) {
+      } else if (ballDirection == direction.right) {
         setState(() {
           ballX += .005;
         });
